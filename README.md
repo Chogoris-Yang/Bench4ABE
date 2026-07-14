@@ -238,10 +238,10 @@ This project is for research purposes. Please cite the paper if you use this cod
 ## Citation
 
 ```bibtex
-@article{biobench2025,
+@article{Bench4ABE2026,
   title={A Comprehensive LLM Benchmark for Automated Bioinformatics Experimental Protocol Generation},
   author={},
   journal={},
-  year={2025}
+  year={2026}
 }
 ```
