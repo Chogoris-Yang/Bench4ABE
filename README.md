@@ -196,7 +196,7 @@ python Experiment_5/stages/stage3_prompt.py
 python Experiment_5/stages/stage4_codegen.py
 ```
 
-### Experiment_6 — RL-Enhanced Pipeline with GLM Optimizer
+### Experiment_6 — RL-Enhanced Pipeline with GLM Optimizer(not in paper, is an extra experiment)
 
 Extends Experiment_5 with GLM-5.1 as an RL policy optimizer supporting PPO, GRPO, and Direct strategies.
 
