@@ -1,0 +1,1099 @@
+================================================================================
+  Complete Prompt Collection — Experiment_1 through Experiment_6
+  For Appendix S1: Baseline Prompts and Their Optimization
+================================================================================
+
+Each prompt is listed with: Experiment, File, Variable/Function name, and full text.
+Template variables shown as {variable_name} indicate runtime substitution.
+
+
+================================================================================
+SECTION 1: EXPERIMENT_1 — Baseline Fine-tuned Models
+================================================================================
+
+--- Prompt 1.1: System Prompt for Plan Generation ---
+Source: Experiment_1/*/ (plan generation pipeline)
+Variable: SYSTEM_PROMPT
+
+"You are an AI research scientist. Your task is to design rigorous, innovative
+experimental plans for bioinformatics research problems. Include: Research Objective,
+Proposed Methodology, Experimental Design, Datasets & Evaluation Metrics, and
+Expected Outcomes & Limitations."
+
+--- Prompt 1.2: Scoring Prompt (Reliability + Innovation) ---
+Source: Experiment_1/*/ (evaluation module)
+Variable: SCORING_PROMPT
+
+"You are an expert scientific reviewer. Please evaluate the given research methodology
+from the following two aspects:
+
+1. Method Reliability (0-100)
+2. Method Innovation (0-100)
+
+Scoring Criteria:
+Method Reliability: technical correctness, experimental rigor, feasibility, logical
+consistency, reproducibility
+Method Innovation: originality, novelty, creativity, research contribution, uniqueness
+of methodology
+
+Your output format MUST strictly follow:
+Reliability: xx
+Innovation: xx
+
+Only output the scores. Do not provide explanations."
+
+--- Prompt 1.3: Plan Optimization Prompt ---
+Source: Experiment_1/*/ (optimization module)
+Variable: OPTIMIZE_PROMPT
+
+"You are an expert research mentor. Analyze the weaknesses of the following experimental
+plan and generate a significantly improved version.
+
+ORIGINAL PLAN:
+----------------
+{plan}
+----------------
+
+CURRENT SCORES: Reliability={reliability}, Innovation={innovation}
+
+IMPROVEMENT FOCUS:
+- If reliability is low: strengthen experimental rigor, add validation steps, improve reproducibility
+- If innovation is low: incorporate novel methodologies, cross-disciplinary approaches, creative evaluation metrics
+- Ensure the plan is complete: objective -> methods -> experiments -> datasets -> metrics -> limitations
+
+Generate the improved plan directly. Make it comprehensive and academically professional."
+
+
+================================================================================
+SECTION 2: EXPERIMENT_2 — Agent-Based Reasoning Frameworks (11 methods)
+================================================================================
+
+--- Prompt 2.1: ReAct System Prompt ---
+Source: Experiment_2/react.py, lines 65-81
+Variable: SYSTEM_PROMPT (ReAct Agent)
+
+"You are an expert AI research scientist with access to specialized tools.
+Your job is to help users design rigorous, innovative experimental plans for their
+research questions.
+
+Available tools:
+1. search_dataset(query) - Search prior research case studies for reference
+2. generate_plan(topic, references) - Generate a complete experimental plan
+3. score_plan(plan_text) - Evaluate plan reliability (0-100) and innovation (0-100) using multiple judges
+4. optimize_plan(plan_text, scores_json) - Improve the plan based on score feedback
+
+Recommended workflow:
+1. Search the dataset for relevant case studies
+2. Generate an initial experimental plan
+3. Score the plan with multiple judges
+4. If scores are low (reliability < 70 or innovation < 60), optimize the plan
+5. Present the final plan and scores to the user
+
+Always think step by step. Explain what you're doing before calling a tool."
+
+--- Prompt 2.2: ReAct Generation Prompt ---
+Source: Experiment_2/react.py, lines 117-131
+Variable: GENERATION_PROMPT
+
+"You are a professional AI research scientist. Based on the user's research objective,
+generate a complete, rigorous, and executable experimental plan.
+
+Requirements:
+1. Clearly describe the research objective
+2. Design the model or methodology
+3. Provide detailed experimental procedures
+4. Include datasets and evaluation metrics
+5. Analyze possible challenges and limitations
+6. Maintain rigorous scientific reasoning
+7. Encourage methodological innovation
+8. Ensure the plan is practical and reproducible
+
+Your response should be well-structured and academically professional."
+
+--- Prompt 2.3: Reflexion Actor Prompt (First Attempt) ---
+Source: Experiment_2/reflexion.py, lines 55-68
+Variable: ACTOR_PROMPT_FIRST
+
+"You are an expert AI research scientist. Generate a complete experimental plan
+for the following research question.
+
+Research Question:
+{question}
+
+Generate a comprehensive, rigorous, and innovative experimental plan including:
+- Research Objective
+- Proposed Methodology
+- Experimental Design
+- Datasets & Evaluation Metrics
+- Expected Outcomes & Limitations
+
+This is your FIRST attempt. Be thorough and creative."
+
+--- Prompt 2.4: Reflexion Actor Prompt (Retry with Reflection) ---
+Source: Experiment_2/reflexion.py, lines 70-95
+Variable: ACTOR_PROMPT_RETRY
+
+"You are an expert AI research scientist. You previously attempted to design
+an experimental plan but it was rated as unsatisfactory. You have reflected on what
+went wrong.
+
+Research Question:
+{question}
+
+PREVIOUS ATTEMPTS & REFLECTIONS:
+---
+{reflection_memory}
+---
+
+CRITICAL INSTRUCTIONS:
+1. Read ALL the reflections above carefully - they identify specific failures in prior attempts
+2. DO NOT repeat the same mistakes
+3. Apply the lessons learned from each reflection
+4. Generate a COMPLETELY NEW plan that addresses every issue raised
+
+Generate a complete experimental plan including:
+- Research Objective
+- Proposed Methodology
+- Experimental Design
+- Datasets & Evaluation Metrics
+- Expected Outcomes & Limitations
+
+Be specific about how this plan differs from and improves upon previous attempts."
+
+--- Prompt 2.5: Reflexion Self-Reflection Prompt (Verbal RL Signal) ---
+Source: Experiment_2/reflexion.py, lines 117-153
+Variable: REFLECTION_PROMPT
+
+"You are a self-reflective AI research scientist. Your previous experimental plan
+was rated as NEEDS IMPROVEMENT. Your task is NOT to fix the plan, but to REFLECT on
+WHY it failed and derive GENERAL LESSONS for future attempts.
+
+Research Question:
+{question}
+
+Failed Plan Summary:
+{plan_summary}
+
+Scores:
+  DeepSeek Judge: Reliability={ds_rel}, Innovation={ds_inn}
+  GPT Judge:      Reliability={gpt_rel}, Innovation={gpt_inn}
+  Combined:       Reliability={combined_rel}, Innovation={combined_inn}
+
+Previous Reflections (if any):
+{previous_reflections}
+
+Please analyze:
+
+1. ROOT CAUSES: What fundamental flaws led to these low scores?
+   - Was the methodology insufficiently rigorous? Why?
+   - Was the innovation lacking? What made it incremental?
+   - Were there logical gaps or missing components?
+
+2. PATTERNS: If this is not the first attempt, are there recurring issues?
+
+3. LESSONS LEARNED: What specific, actionable principles should guide the NEXT attempt?
+   - 'Next time, I should...'
+   - 'I must avoid...'
+   - 'I need to strengthen...'
+
+4. STRATEGY CHANGE: How should the NEXT attempt differ fundamentally from this one?
+
+Output a structured reflection. Be honest, specific, and actionable.
+These reflections will be used as a 'verbal reinforcement signal' to improve future
+generations."
+
+--- Prompt 2.6: LATS Root Generation (Tree Search) ---
+Source: Experiment_2/lats.py, lines 58-79
+Variable: ROOT_GENERATION_PROMPT
+
+"You are an expert AI research scientist. Generate {breadth} DISTINCT experimental plans
+for the following research question. Each plan should take a DIFFERENT approach -
+explore diverse methodologies, experimental designs, or evaluation strategies.
+
+Research Question:
+{question}
+
+For each of the {breadth} plans, include:
+- A unique identifier (Plan A, Plan B, ...)
+- The CORE IDEA that differentiates it from the others
+- Research Objective
+- Proposed Methodology
+- Experimental Design
+- Expected Strengths & Weaknesses
+
+Output format (JSON array):
+[
+  {{'plan_id': 'A', 'core_idea': 'what makes this unique', 'plan': 'complete plan text...'}},
+  ...
+]
+
+Make the plans GENUINELY different - not just minor variations. Explore the solution
+space broadly."
+
+--- Prompt 2.7: LATS Expand Prompt (Tree Branch Refinement) ---
+Source: Experiment_2/lats.py, lines 82-103
+Variable: EXPAND_PROMPT
+
+"You are an expert AI research scientist. You have a best-so-far experimental plan.
+Your task: Generate {breadth} IMPROVED VARIATIONS of this plan, each taking a different
+refinement direction.
+
+Current Best Plan:
+---
+{best_plan}
+---
+
+Scores: Reliability={reliability}, Innovation={innovation}
+
+Generate {breadth} DISTINCT improvements. Each variation should:
+- Address weaknesses in the original
+- Push in a DIFFERENT direction (e.g., one more rigorous, one more innovative, one more practical)
+- Keep the core strengths while fixing specific issues
+
+Output format (JSON array):
+[
+  {{'plan_id': 'V1', 'improvement_direction': 'e.g., stronger theoretical grounding', 'plan': 'improved plan text...'}},
+  ...
+]
+
+Be creative - explore genuinely different ways to improve the plan."
+
+--- Prompt 2.8: Scoring Prompt (shared across all Experiment_2 methods) ---
+Source: Experiment_2/react.py, lines 83-98 (same instance reused in reflexion.py, lats.py, etc.)
+Variable: SCORING_PROMPT
+
+"You are an expert scientific reviewer.
+
+Please evaluate the given research methodology from the following two aspects:
+
+1. Method Reliability (0-100)
+2. Method Innovation (0-100)
+
+Scoring Criteria:
+Method Reliability: technical correctness, experimental rigor, feasibility, logical
+consistency, reproducibility
+Method Innovation: originality, novelty, creativity, research contribution, uniqueness
+of methodology
+
+Your output format MUST strictly follow:
+Reliability: xx
+Innovation: xx
+
+Only output the scores. Do not provide explanations."
+
+--- Prompt 2.9: ReAct Optimize Prompt ---
+Source: Experiment_2/react.py, lines 100-115
+Variable: OPTIMIZE_PROMPT
+
+"You are an expert research mentor. Analyze the weaknesses of the following experimental
+plan and generate a significantly improved version.
+
+ORIGINAL PLAN:
+----------------
+{plan}
+----------------
+
+CURRENT SCORES: Reliability={reliability}, Innovation={innovation}
+
+IMPROVEMENT FOCUS:
+- If reliability is low: strengthen experimental rigor, add validation steps, improve reproducibility
+- If innovation is low: incorporate novel methodologies, cross-disciplinary approaches, creative evaluation metrics
+- Ensure the plan is complete: objective -> methods -> experiments -> datasets -> metrics -> limitations
+
+Generate the improved plan directly. Make it comprehensive and academically professional."
+
+
+================================================================================
+SECTION 3: EXPERIMENT_3 — RL Strategies (PPO, GRPO, GSPO, DAPO, ODP)
+================================================================================
+
+--- Prompt 3.1: PPO Critic Value Function Estimation ---
+Source: Experiment_3/ppo_agent.py, lines ~46-64
+Variable: CRITIC_PROMPT
+
+"You are a VALUE FUNCTION ESTIMATOR (Critic model).
+Your job is to estimate the EXPECTED quality of experimental plans for a research question
+BEFORE seeing any actual plan. This is V(s) - the state value.
+
+Research Question:
+{question}
+
+Based on the research question alone, analyze:
+1. Domain complexity: How hard is this problem?
+2. Methodology maturity: Are there well-established approaches?
+3. Innovation potential: How much room is there for novel methods?
+
+Then output your VALUE ESTIMATE:
+Expected_Reliability: xx   (0-100 - what reliability score do you expect?)
+Expected_Innovation: xx    (0-100 - what innovation score do you expect?)
+
+Output format:
+Expected_Reliability: xx
+Expected_Innovation: xx
+
+Only output these two numbers."
+
+--- Prompt 3.2: PPO Optimization Instructions ---
+Source: Experiment_3/ppo_agent.py
+Variable: PPO_INSTRUCTIONS
+
+"PPO-SPECIFIC OPTIMIZATION:
+The advantage signal (A={advantage:.1f}) = current_reward - critic_baseline({critic_baseline:.1f}).
+This measures how much BETTER or WORSE your plan is compared to expectations.
+
+- Positive advantage (A > 0): Plan EXCEEDS expectations. Make INCREMENTAL refinements.
+- Negative advantage (A < 0): Plan BELOW expectations. Rethink approach more substantially.
+
+Clipping constraint (epsilon={epsilon}):
+  Probability ratio must stay in [{lower}, {upper}].
+  Changes should be MEASURED, not radical rewrites."
+
+--- Prompt 3.3: GRPO Group Compare (Cross-Group Learning) ---
+Source: Experiment_3/grpo_agent.py
+Variable: GRPO_COMPARE_PROMPT
+
+"Analyze a group of experimental plans to identify success factors.
+
+Research Question: {question}
+
+Group Plans (sorted by reward, highest first):
+{group_summaries}
+
+Analyze:
+1. What COMMON PATTERNS do top-ranked plans share?
+2. What distinguishes the BEST plan from the rest?
+3. What did the LOWEST-ranked plan do wrong?
+4. What CROSS-CUTTING IMPROVEMENTS would lift all plans?"
+
+--- Prompt 3.4: GRPO Optimization (High Advantage) ---
+Source: Experiment_3/grpo_agent.py
+Variable: GRPO_INSTRUCTIONS_HIGH
+
+"ADVANTAGE={advantage}sigma (>+1sigma): TOP PERFORMER.
+Make CONSERVATIVE, targeted refinements. Keep your successful core methodology.
+Polish weak sections, add rigor, improve clarity. No major structural changes."
+
+--- Prompt 3.5: GRPO Optimization (Medium Advantage) ---
+Source: Experiment_3/grpo_agent.py
+Variable: GRPO_INSTRUCTIONS_MEDIUM
+
+"ADVANTAGE={advantage}sigma (near mean): AVERAGE.
+Learn from what the best plans do differently. Add novelty from diverse angles.
+Identify 2-3 specific improvements that would move you above the group mean."
+
+--- Prompt 3.6: GRPO Optimization (Low Advantage) ---
+Source: Experiment_3/grpo_agent.py
+Variable: GRPO_INSTRUCTIONS_LOW
+
+"ADVANTAGE={advantage}sigma (<-1sigma): BELOW MEAN.
+Rethink your core approach. Study the high-advantage plans' strategies.
+Consider a DIFFERENT methodology or experimental design paradigm."
+
+--- Prompt 3.7: GSPO Mutation Directions ---
+Source: Experiment_3/gspo_agent.py
+Variable: MUTATION_DIRECTIONS (list of 7)
+
+1. "Increase methodological rigor - add validation steps, formal definitions, reproducibility measures"
+2. "Boost innovation - incorporate a novel cross-disciplinary technique or unconventional evaluation"
+3. "Improve practicality - add concrete implementation details, dataset specifics, feasibility analysis"
+4. "Strengthen theoretical grounding - add formal foundations, mathematical justification, literature connections"
+5. "Enhance experimental design - add ablation studies, control groups, statistical power analysis"
+6. "Expand scope - generalize the approach to handle broader problem classes or more diverse conditions"
+7. "Sharpen focus - narrow to the most impactful sub-problem and go deeper on it"
+
+--- Prompt 3.8: GSPO Mutation Template ---
+Source: Experiment_3/gspo_agent.py
+Variable: GSPO_MUTATION_PROMPT
+
+"Apply DIRECTED MUTATION to an elite experimental plan (sequential policy optimization).
+
+ELITE PLAN (Round {round}, Rank {rank}/{total_elite}):
+---
+{elite_plan}
+---
+
+Scores: Reliability={reliability}, Innovation={innovation}
+Cumulative Advantage: {advantage}
+Mutation: {mutation_direction}  (temperature={temperature})
+
+Generate a MUTATED version. PRESERVE strengths, EXPLORE the variation direction,
+make COHERENT changes."
+
+--- Prompt 3.9: DAPO Section Scoring ---
+Source: Experiment_3/dapo_agent.py
+Variable: SECTION_SCORING_PROMPT
+
+"Evaluate a specific SECTION of an experimental plan.
+
+Evaluate on:
+1. Technical Quality (0-100): correctness, depth, rigor within this section
+2. Completeness (0-100): does this section cover everything it should?
+
+Output: Quality: xx\nCompleteness: xx"
+
+--- Prompt 3.10: DAPO Asymmetric Optimization ---
+Source: Experiment_3/dapo_agent.py
+Variable: DAPO_OPTIMIZE_PROMPT
+
+"Optimize using ASYMMETRIC DAPO feedback.
+
+DAPO Analysis:
+  Overall reward: {reward}
+  Asymmetric advantage: {advantage}sigma  (epsilon_low={clip_low}, epsilon_high={clip_high})
+  Section scores: {section_scores}
+  Filter status: {filter_status}
+  Length penalty: {length_penalty}
+
+ASYMMETRIC RULE:
+- Positive advantage -> BOLD exploration allowed (epsilon_high={clip_high} ceiling)
+- Negative advantage -> CONSERVATIVE fixes only (epsilon_low={clip_low} floor)
+
+Weak sections to redesign: {weak_sections}
+
+ORIGINAL PLAN:
+----------------
+{plan}
+----------------
+
+Apply asymmetric update. For high-scoring sections: preserve (low mutation).
+For low-scoring sections: redesign (higher mutation)."
+
+--- Prompt 3.11: ODP Teacher Reference ---
+Source: Experiment_3/odp_agent.py
+Variable: TEACHER_REFERENCE_PROMPT
+
+"You are an EXPERT TEACHER (GPT-5.4) generating a GOLD-STANDARD reference plan.
+
+Research Question:
+{question}
+
+Generate a comprehensive reference plan demonstrating deep methodological expertise.
+This reference will GUIDE the student's learning - make it exemplary and complete."
+
+--- Prompt 3.12: ODP Auxiliary Teacher (GLM-5.1) ---
+Source: Experiment_3/odp_agent.py
+Variable: AUX_TEACHER_PROMPT
+
+"You are an AUXILIARY TEACHER (GLM5.1) providing a supplementary reference.
+
+Research Question:
+{question}
+
+Primary teacher has provided one reference. Generate an ALTERNATIVE high-quality reference
+that takes a DIFFERENT approach. This gives the student multiple expert perspectives to
+learn from.
+
+Output a complete experimental plan with a clearly different methodology from what a
+typical expert might propose."
+
+--- Prompt 3.13: ODP Teacher Critique ---
+Source: Experiment_3/odp_agent.py
+Variable: TEACHER_CRITIQUE_PROMPT
+
+"You are an EXPERT TEACHER evaluating a student's plan.
+
+Research Question: {question}
+
+YOUR REFERENCE (gold standard):
+---
+{reference_plan}
+---
+
+AUXILIARY TEACHER'S ALTERNATIVE REFERENCE:
+---
+{aux_reference}
+---
+
+STUDENT'S PLAN:
+---
+{student_plan}
+---
+
+Student's scores: Reliability={student_rel}, Innovation={student_inn}, Reward={student_reward}
+
+Provide a detailed TEACHING critique:
+1. STRENGTHS (reinforce these)
+2. GAPS vs BOTH references (what the student missed)
+3. SPECIFIC IMPROVEMENTS (exactly what to change)
+4. DISTILLATION SIGNAL (key principles to absorb)
+5. CONFIDENCE (0-100)
+
+Be CONSTRUCTIVE and ACTIONABLE."
+
+--- Prompt 3.14: ODP Student Learning ---
+Source: Experiment_3/odp_agent.py
+Variable: STUDENT_LEARN_PROMPT
+
+"You are a STUDENT learning from two expert teachers.
+
+Research Question: {question}
+
+YOUR CURRENT PLAN:
+---
+{current_plan}
+---
+
+TEACHER'S CRITIQUE:
+---
+{teacher_critique}
+---
+
+TEACHER'S REFERENCE (inspiration - do not copy):
+---
+{teacher_reference}
+---
+
+AUXILIARY TEACHER'S ALTERNATIVE:
+---
+{aux_reference}
+---
+
+DISTILLATION WEIGHT: alpha={alpha}  |  Current Reward: {reward}
+
+LEARNING OBJECTIVE: L = alpha * L_distill + (1-alpha) * L_reward
+{alpha_desc}
+
+INSTRUCTIONS:
+1. Absorb key principles from BOTH teachers (DISTILLATION)
+2. Apply specific improvements from the critique
+3. Preserve your own UNIQUE insights
+4. SYNTHESIZE the best of all perspectives
+
+Generate your IMPROVED plan."
+
+--- Prompt 3.15: Shared Generation Prompt (Experiment_3) ---
+Source: Experiment_3/rl_components.py
+Variable: GENERATION_PROMPT
+
+"You are an expert AI research scientist. Based on the following research objective,
+generate a complete, rigorous, and innovative experimental plan.
+
+Requirements:
+1. Clearly state the Research Objective
+2. Design the Proposed Methodology with technical depth
+3. Provide detailed Experimental Design including variables, controls, and procedures
+4. Specify Datasets and Evaluation Metrics
+5. Analyze Expected Outcomes and Potential Limitations
+6. Maintain rigorous scientific reasoning
+7. Encourage methodological innovation
+8. Ensure the plan is practical and reproducible
+
+Research Objective:
+{question}
+
+Additional Context:
+{context}
+
+Generate a comprehensive and well-structured experimental plan."
+
+--- Prompt 3.16: Shared Optimization Prompt (Experiment_3) ---
+Source: Experiment_3/rl_components.py
+Variable: OPTIMIZATION_PROMPT
+
+"You are an expert research mentor. Improve the following experimental plan
+based on the provided feedback and reward signal.
+
+ORIGINAL PLAN:
+----------------
+{plan}
+----------------
+
+CURRENT SCORES: Reliability={reliability}, Innovation={innovation}
+REWARD SIGNAL: {reward}
+ADVANTAGE: {advantage}
+
+{rl_specific_instructions}
+
+Generate the improved plan directly. Make it comprehensive and academically professional.
+Focus specifically on the improvement areas indicated by the advantage signal."
+
+--- Prompt 3.17: Shared Group Generation Prompt (Experiment_3) ---
+Source: Experiment_3/rl_components.py
+Variable: GROUP_GENERATION_PROMPT
+
+"You are an expert AI research scientist. Generate {k} DISTINCT experimental plans
+for the following research question. Each plan should take a GENUINELY DIFFERENT approach.
+
+Research Question:
+{question}
+
+Requirements:
+- Each plan must have a unique core idea and methodology
+- Explore diverse angles: theoretical, empirical, computational, cross-disciplinary
+- Vary the evaluation strategies and dataset choices
+
+Output exactly {k} plans as a JSON array:
+[
+  {{'plan_id': 'A', 'core_idea': '...', 'plan': 'complete plan text...'}},
+  ...
+]
+
+Make the plans TRULY diverse - not just minor variations of each other."
+
+
+================================================================================
+SECTION 4: EXPERIMENT_4 — RAG-Enhanced Pipeline
+================================================================================
+
+--- Prompt 4.1: RAG-Enhanced Generation ---
+Source: Experiment_4/rag_components.py
+Variable: RAG_GENERATION_PROMPT
+
+"You are an expert AI research scientist with access to a KNOWLEDGE RETRIEVAL SYSTEM.
+
+Below are RELEVANT RESEARCH PAPERS and PROTOCOLS retrieved for your task:
+
+---
+{retrieved_context}
+---
+
+Based on the research objective AND the retrieved knowledge above, generate a complete,
+rigorous, and innovative experimental plan.
+
+Research Objective:
+{question}
+
+Additional Context:
+{context}
+
+INSTRUCTIONS:
+1. INCORPORATE relevant methods and findings from the retrieved papers
+2. CITE specific papers when you use their methodology (e.g., 'As demonstrated by Smith et al. (2024)...')
+3. IDENTIFY gaps in existing approaches that your plan could address
+4. SYNTHESIZE insights from multiple retrieved sources
+5. DO NOT fabricate citations - only reference papers shown above
+
+Generate a comprehensive and well-structured experimental plan."
+
+--- Prompt 4.2: RAG-Enhanced Optimization ---
+Source: Experiment_4/rag_components.py
+Variable: RAG_OPTIMIZATION_PROMPT
+
+"You are an expert research mentor optimizing an experimental plan with RETRIEVED KNOWLEDGE.
+
+RETRIEVED KNOWLEDGE (external evidence):
+---
+{retrieved_context}
+---
+
+ORIGINAL PLAN:
+----------------
+{plan}
+----------------
+
+CURRENT SCORES: Reliability={reliability}, Innovation={innovation}
+REWARD SIGNAL: {reward}
+ADVANTAGE: {advantage}
+
+{rl_specific_instructions}
+
+OPTIMIZATION INSTRUCTIONS:
+1. Use the retrieved knowledge to FIX weaknesses in the original plan
+2. If retrieved papers suggest BETTER methods, adopt them
+3. If original plan CONTRADICTS external evidence, correct it
+4. ADD missing components that retrieved protocols include
+
+Generate the improved plan directly."
+
+--- Prompt 4.3: RAG Critique (Post-Generation Fact-Checking) ---
+Source: Experiment_4/rag_components.py
+Variable: RAG_CRITIQUE_PROMPT
+
+"You are an expert scientific reviewer with access to EXTERNAL KNOWLEDGE.
+
+RETRIEVED KNOWLEDGE:
+---
+{retrieved_context}
+---
+
+PLAN TO CRITIQUE:
+---
+{plan}
+---
+
+Research Question: {question}
+
+CRITIQUE TASK:
+1. FACT-CHECK claims against retrieved papers - flag any contradictions
+2. IDENTIFY missed opportunities - what methods from the literature should be included?
+3. SUGGEST improvements grounded in the retrieved evidence
+4. ASSESS novelty - does this plan go beyond existing work?
+
+Output a structured critique. Be specific and cite the retrieved papers."
+
+--- Prompt 4.4: RAG Teacher (Knowledge-Informed Reference) ---
+Source: Experiment_4/rag_components.py
+Variable: RAG_TEACHER_PROMPT
+
+"You are an EXPERT TEACHER generating a reference plan informed by EXTERNAL KNOWLEDGE.
+
+RETRIEVED KNOWLEDGE:
+---
+{retrieved_context}
+---
+
+Research Question: {question}
+
+Generate a gold-standard reference plan that:
+1. SYNTHESIZES the best methods from retrieved papers
+2. ADDS your own expert insights beyond the retrieved content
+3. Provides a COMPLETE experimental protocol
+
+This reference will guide the student's learning."
+
+
+================================================================================
+SECTION 5: EXPERIMENT_5 — 4-Stage Pipeline
+================================================================================
+
+--- Prompt 5.1: Initial Plan Generation (Round 1) ---
+Source: Experiment_5/pipeline_runner.py
+Variable: GEN_INITIAL
+
+"You are an expert AI research scientist. Generate a complete experimental plan.
+
+Research Question: {question}
+Retrieved Knowledge: {context}
+
+Include:
+1. Research Objective
+2. Proposed Methodology
+3. Experimental Design
+4. Datasets & Metrics
+5. Limitations
+
+Be rigorous and innovative. Output the complete plan."
+
+--- Prompt 5.2: Plan Refinement (Rounds 2-3) ---
+Source: Experiment_5/pipeline_runner.py
+Variable: GEN_REFINE
+
+"You are refining an experimental plan based on dual-judge feedback and detailed critiques.
+
+Research Question: {question}
+Retrieved Knowledge: {context}
+
+PREVIOUS PLAN (Round {prev_round}):
+---
+{prev_plan}
+---
+
+JUDGE SCORES (Round {prev_round}):
+- {judge1}: Reliability={j1_rel}, Innovation={j1_inn}
+- {judge2}: Reliability={j2_rel}, Innovation={j2_inn}
+- Combined: Reliability={comb_rel}, Innovation={comb_inn}
+
+DETAILED JUDGE CRITIQUES FROM ALL PAST ROUNDS:
+---
+{past_iteration_issues}
+---
+
+PROMPT IMPROVEMENT HISTORY:
+---
+{past_prompt_issues}
+---
+
+CRITICAL INSTRUCTIONS:
+1. Read EVERY critique above carefully - each one identifies a specific failure
+2. Address ALL weaknesses raised by the judges in past rounds
+3. {avoid_msg}
+4. Produce a SIGNIFICANTLY improved plan - not minor edits
+5. If innovation scores are low, try a fundamentally different methodological approach
+6. If reliability scores are low, add validation steps, formal definitions, and reproducibility measures
+
+Generate the improved experimental plan. Be specific about WHAT changed and WHY."
+
+--- Prompt 5.3: Prompt Analysis ---
+Source: Experiment_5/pipeline_runner.py
+Variable: PROMPT_ANALYSIS
+
+"Analyze the generation prompt used to produce this experimental plan.
+
+Research Question: {question}
+Plan Reliability={comb_rel}, Innovation={comb_inn}
+
+PROMPT USED:
+---
+{prompt_used}
+---
+
+Past prompt issues:
+{past_prompt_issues}
+
+Identify prompt weaknesses that caused low scores and propose an improved prompt.
+Output:
+Analysis: (what went wrong with the prompt)
+Improved_Prompt: (the revised complete prompt)"
+
+--- Prompt 5.4: Code Generation ---
+Source: Experiment_5/pipeline_runner.py
+Variable: CODE_GEN
+
+"You are an expert bioinformatics software engineer. Generate COMPLETE, RUNNABLE Python code
+implementing the core methodology from the experimental plan below.
+
+EXPERIMENTAL PLAN:
+---
+{plan}
+---
+
+Research Question: {question}
+
+Generate MULTIPLE Python files:
+1. main.py - entry point, data loading, pipeline orchestration
+2. model.py - core model architecture
+3. train.py - training loop with config
+4. utils.py - helper functions
+
+Output as:
+===FILE:main.py===
+(code)
+===FILE:model.py===
+(code)
+===FILE:train.py===
+(code)
+===FILE:utils.py===
+(code)
+
+Make code self-contained, documented, and runnable."
+
+--- Prompt 5.5: Judge Critique Generator (Plan) ---
+Source: Experiment_5/pipeline_runner.py
+Variable: CRITIQUE_PLAN
+
+"You are an expert scientific reviewer. Based on the dual-judge scores below,
+write a DETAILED, ACTIONABLE critique of this experimental plan.
+
+Research Question: {question}
+
+JUDGE SCORES:
+- {judge1}: Reliability={j1_rel}, Innovation={j1_inn}
+- {judge2}: Reliability={j2_rel}, Innovation={j2_inn}
+- Combined: Reliability={comb_rel}, Innovation={comb_inn}
+
+PLAN (excerpt):
+---
+{plan_excerpt}
+---
+
+Write a structured critique covering:
+1. SPECIFIC WEAKNESSES that caused low scores (cite exact sections or missing components)
+2. CONCRETE SUGGESTIONS for improvement (what to add, change, or remove)
+3. WHAT WAS DONE WELL (preserve these strengths in the next iteration)
+4. ONE KEY INSIGHT that the next round MUST incorporate
+
+Be direct and specific. The next iteration will use this critique to improve."
+
+--- Prompt 5.6: Judge Critique Generator (Prompt) ---
+Source: Experiment_5/pipeline_runner.py
+Variable: CRITIQUE_PROMPT
+
+"You are an expert prompt engineer. Analyze why this prompt produced suboptimal results.
+
+Question: {question}
+Stage2 Plan Scores: Reliability={comb_rel}, Innovation={comb_inn}
+
+PROMPT USED:
+---
+{prompt_text}
+---
+
+Write a detailed critique:
+1. What the prompt LACKED (missing instructions, vague phrasing)
+2. What INSTRUCTIONS would have produced a better plan
+3. CONCRETE PROMPT REWRITE SUGGESTIONS
+
+Be specific - the next iteration's prompt will incorporate this feedback."
+
+--- Prompt 5.7: Judge Critique Generator (Code) ---
+Source: Experiment_5/pipeline_runner.py
+Variable: CRITIQUE_CODE
+
+"You are a senior code reviewer. Critique this generated experiment code.
+
+Question: {question}
+Stage4 Code Scores: Reliability={comb_rel}, Innovation={comb_inn}
+
+CODE EXCERPT:
+---
+{code_excerpt}
+---
+
+Write a detailed critique:
+1. CODE QUALITY ISSUES (bugs, missing imports, logic errors, incomplete sections)
+2. MISSING FUNCTIONALITY (what the code should do but doesn't)
+3. IMPROVEMENTS for the next iteration
+
+Be specific about lines/modules that need fixing."
+
+--- Prompt 5.8: Retrieval Quality Scoring ---
+Source: Experiment_5/stages/stage1_retrieval.py
+Variable: SCORING_PROMPT (retrieval-specific)
+
+"Evaluate this retrieved information for a research task.
+
+Research Question: {question}
+
+Retrieved Content:
+{retrieved_text}
+
+Evaluate:
+1. Relevance (0-100): How relevant is the retrieved info to the question?
+2. Completeness (0-100): Does it cover the key aspects needed to design an experiment?
+
+Output:
+Relevance: xx
+Completeness: xx"
+
+--- Prompt 5.9: Prompt Quality Scoring ---
+Source: Experiment_5/stages/stage3_prompt.py
+Variable: PROMPT_SCORING
+
+"Evaluate this prompt for generating scientific experimental plans.
+
+Prompt:
+{prompt}
+
+Evaluate:
+1. Specificity (0-100): How specific and detailed are the instructions?
+2. Coverage (0-100): Does it cover all necessary aspects (method, experiment, evaluation)?
+
+Output:
+Specificity: xx
+Coverage: xx"
+
+--- Prompt 5.10: Code Quality Scoring ---
+Source: Experiment_5/stages/stage4_codegen.py
+Variable: (inline scoring call)
+
+"Evaluate this code for the research: {question}
+
+CODE:
+{code}
+
+Rate Correctness (0-100) and Completeness (0-100).
+Output: Correctness: xx\nCompleteness: xx"
+
+
+================================================================================
+SECTION 6: EXPERIMENT_6 — RL-Enhanced Pipeline with GLM
+================================================================================
+
+--- Prompt 6.1: GLM Policy Decision (RL Optimizer) ---
+Source: Experiment_6/rl_pipeline.py
+Variable: GLM_POLICY_PROMPT
+
+"You are an RL policy optimizer (GLM-5.1). Analyze the judge feedback from
+the current round and determine the OPTIMAL REFINEMENT STRATEGY for the next round.
+
+Research Question: {question}
+
+ROUND {round} RESULTS:
+- Stage2 Plan: Reliability={s2_rel}, Innovation={s2_inn}
+- Stage3 Prompt: Reliability={s3_rel}, Innovation={s3_inn}
+- Stage4 Code: Reliability={s4_rel}, Innovation={s4_inn}
+- Round Reward: {reward}
+- Reward Delta from Previous: {delta}
+
+CRITIQUES:
+Stage2: {s2_critique}
+Stage3: {s3_critique}
+Stage4: {s4_critique}
+
+{rl_instructions}
+
+Output a structured REFINEMENT STRATEGY:
+1. PRIORITY: Which stage needs the most improvement? (Stage2/Stage3/Stage4)
+2. FOCUS_AREAS: 2-3 specific aspects to fix (be concrete)
+3. STRATEGY: How should the next round's generation differ?
+4. AGGRESSIVENESS: (0-100) How radically should we change the approach?
+
+Output as:
+Priority: <stage>
+Focus_Areas: <list>
+Strategy: <text>
+Aggressiveness: <number>"
+
+--- Prompt 6.2: PPO RL Instructions ---
+Source: Experiment_6/rl_pipeline.py
+Variable: PPO_RL_INSTR
+
+"PPO MODE: You operate under a clipped surrogate objective (epsilon={epsilon}).
+- If the delta is positive, propose CONSERVATIVE refinements (stay close to current policy)
+- If the delta is negative, propose more aggressive changes
+- Your refinement ratio must stay within [1-epsilon, 1+epsilon] of the current approach"
+
+--- Prompt 6.3: GRPO RL Instructions ---
+Source: Experiment_6/rl_pipeline.py
+Variable: GRPO_RL_INSTR
+
+"GRPO MODE: Generate {k} DISTINCT alternative refinement strategies.
+Each strategy should take a DIFFERENT approach to improving the plan.
+Output for EACH strategy: Priority, Focus_Areas, Strategy, Aggressiveness.
+Format as JSON array of strategy objects."
+
+--- Prompt 6.4: Direct RL Instructions ---
+Source: Experiment_6/rl_pipeline.py
+Variable: DIRECT_RL_INSTR
+
+"DIRECT MODE: Output the single best refinement strategy.
+No RL constraints - optimize freely based on the critiques."
+
+--- Prompt 6.5: RL-Enhanced Plan Refinement ---
+Source: Experiment_6/rl_pipeline.py
+Variable: GEN_REFINE (RL-enhanced version)
+
+"Refine this plan based on judge feedback AND an RL optimizer's strategic directives.
+
+Research Question: {question}
+Retrieved Knowledge: {context}
+PREVIOUS PLAN: {prev_plan}
+
+JUDGE SCORES: Reliability={comb_rel}, Innovation={comb_inn}
+RL OPTIMIZER STRATEGY:
+- Priority Stage: {priority}
+- Focus Areas: {focus_areas}
+- Strategy Directive: {rl_strategy}
+- Aggressiveness: {aggressiveness}/100 (higher = more radical change)
+
+CRITIQUES FROM PAST ROUNDS:
+{past_issues}
+
+Improve the plan addressing ALL focus areas. Match the specified aggressiveness level."
+
+--- Prompt 6.6: RL-Enhanced Code Generation ---
+Source: Experiment_6/rl_pipeline.py
+Variable: CODE_GEN (RL-enhanced version)
+
+"Expert bioinformatics engineer. Generate Python code from this plan.
+PLAN: {plan}
+Question: {question}
+RL Directive: {rl_strategy}
+Generate 4 files: main.py, model.py, train.py, utils.py
+Output: ===FILE:main.py=== (code) ===FILE:model.py=== (code) ===FILE:train.py=== (code) ===FILE:utils.py=== (code)"
+
+--- Prompt 6.7: RL-Enhanced Prompt Refinement ---
+Source: Experiment_6/rl_pipeline.py
+Variable: PROMPT_REFINE
+
+"Improve this generation prompt based on RL optimizer feedback.
+Question: {question}
+Current Prompt: {current_prompt}
+RL Optimization Strategy: {rl_strategy}
+Past Prompt Issues: {past_prompt}
+Output the complete improved prompt."
+
+--- Prompt 6.8: Critique Templates ---
+Source: Experiment_6/rl_pipeline.py
+Variable: CRITIQUE_TMPL (generic function returning stage-specific prompts)
+
+"Critique this {stage} (R={reliability} I={innovation}).
+Question: {question}
+Content: {content}
+Output: 1.Specific weaknesses 2.Concrete improvements 3.What to preserve."
+
+
+================================================================================
+END OF PROMPT COLLECTION
+Total: 50+ distinct prompts across 6 experiments
+================================================================================
