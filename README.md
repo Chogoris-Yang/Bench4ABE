@@ -234,14 +234,3 @@ biobench/
 ## License
 
 This project is for research purposes. Please cite the paper if you use this code or dataset.
-
-## Citation
-
-```bibtex
-@article{Bench4ABE2026,
-  title={A Comprehensive LLM Benchmark for Automated Bioinformatics Experimental Protocol Generation},
-  author={},
-  journal={},
-  year={2026}
-}
-```
