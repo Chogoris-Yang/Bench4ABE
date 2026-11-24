@@ -1,14 +1,4 @@
-import os
-import json
-from openai import OpenAI
 
-# ========== 1. 初始化 DeepSeek ==========
-client = OpenAI(
-    api_key="sk-f375071129cd488093ca55935a9e1afa",
-    base_url="https://api.deepseek.com"
-)
-
-# ========== 2. Long-CoT Prompt 模板 ==========
 PROMPT_TEMPLATE = """
 You are an expert research analyst.
 
@@ -150,52 +140,3 @@ User Request:
 
 {paper_json}
 """
-
-# ========== 3. 单个文件处理 ==========
-def generate_long_cot(json_data):
-    prompt = PROMPT_TEMPLATE.format(
-        paper_json=json.dumps(json_data, ensure_ascii=False, indent=2)
-    )
-
-    response = client.chat.completions.create(
-        model="deepseek-chat",   # 推荐这个
-        messages=[
-            {"role": "system", "content": "You are a precise and structured reasoning assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.2,   # 低一点更稳定
-        max_tokens=4000    # ⚠️ 很重要，Long-CoT必须开大
-    )
-
-    return response.choices[0].message.content
-
-
-# ========== 4. 批量处理 ==========
-def process_folder(input_dir, output_dir):
-    os.makedirs(output_dir, exist_ok=True)
-
-    for filename in os.listdir(input_dir):
-        if not filename.endswith(".json"):
-            continue
-
-        input_path = os.path.join(input_dir, filename)
-        output_path = os.path.join(output_dir, filename.replace(".json", "_long_cot.txt"))
-
-        print(f"Processing: {filename}")
-
-        with open(input_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        try:
-            result = generate_long_cot(data)
-
-            with open(output_path, "w", encoding="utf-8") as f:
-                f.write(result)
-
-        except Exception as e:
-            print(f"Error processing {filename}: {e}")
-
-
-# ========== 5. 运行 ==========
-if __name__ == "__main__":
-    process_folder(r"D:\PycharmProjects\BioResearcher-main\auto_bioresearcher\download\json", "raw_jsons")
