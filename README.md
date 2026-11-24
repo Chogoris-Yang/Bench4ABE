@@ -1,6 +1,6 @@
-# BioBench: A Comprehensive LLM Benchmark for Automated Bioinformatics Experimental Protocol Generation
+# An AI4Research Scoring Benchmark: Diagnosing Score Inflation and Enabling Economical Protocol Generation
 
-This repository contains the code and data for the paper **"A Comprehensive LLM Benchmark for Automated Bioinformatics Experimental Protocol Generation"**. The project systematically evaluates and optimizes Large Language Models (LLMs) for generating rigorous, innovative experimental plans in bioinformatics research.
+This repository contains the code and data for the paper **"An AI4Research Scoring Benchmark: Diagnosing Score Inflation and Enabling Economical Protocol Generation"**. The project systematically evaluates and optimizes Large Language Models (LLMs) for generating rigorous, innovative experimental plans in bioinformatics research.
 
 ## Dataset
 
